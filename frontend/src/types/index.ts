@@ -226,3 +226,23 @@ export interface AlertaStock {
   stock_actual: number;
   deficit: number;
 }
+
+// ---- AUTENTICACIÓN ----
+export interface TokenResponse {
+  access_token: string;
+  token_type: string;
+}
+
+export interface LoginRequest {
+  username: string;
+  password: string;
+}
+
+export interface Usuario {
+  id: number;
+  nombre: string;
+  email: string;
+  rol_id: number;
+  sucursal_id: number;
+  activo: boolean;
+}
