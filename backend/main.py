@@ -11,7 +11,7 @@ from auth import (
     get_current_active_user,
 )
 
-# Importar modelos para que SQLAlchemy los registre
+# Importar modelos
 try:
     from app.models.base import Usuario, Rol, CategoriaMateriaPrima
     from app.models.materia_prima import (
@@ -28,7 +28,6 @@ try:
     from app.models.ventas import Venta, VentaItem
     from app.models.auditoria import MovimientoInventario, AuditoriaCambios
 except ImportError:
-    # Si los modelos no están en app/, importar directamente
     from models_base import Usuario, Rol, CategoriaMateriaPrima
     from models_materia_prima import (
         UnidadMedida, ConversionUnidades, Proveedor,
@@ -51,6 +50,23 @@ from app.schemas.auth import (
     UsuarioRead,
     UsuarioReadMe,
 )
+
+# Importar routers
+try:
+    from app.routes.materia_prima import router as router_materia_prima
+    from app.routes.recetas import router as router_recetas
+    from app.routes.productos import router as router_productos
+    from app.routes.ventas import router as router_ventas
+    from app.routes.produccion import router as router_produccion
+    from app.routes.reportes import router as router_reportes
+except ImportError:
+    # Fallback: los routers se incluirán manualmente abajo
+    router_materia_prima = None
+    router_recetas = None
+    router_productos = None
+    router_ventas = None
+    router_produccion = None
+    router_reportes = None
 
 # Inicializar aplicación
 app = FastAPI(
@@ -156,72 +172,23 @@ def get_current_user_endpoint(
     """Obtener usuario actual autenticado"""
     return current_user
 
-# ==================== PLACEHOLDER PARA RUTAS ====================
+# ==================== INCLUIR ROUTERS ====================
 
-@app.get("/api/v1/materia-prima")
-def get_materia_prima(
-    skip: int = 0,
-    limit: int = 100,
-    db: Session = Depends(get_db),
-    current_user = Depends(get_current_active_user) if settings.REQUIRE_AUTH else None
-):
-    """Obtener lista de materia prima"""
-    return []
+# Si los imports funcionaron, incluir los routers
+if router_materia_prima:
+    app.include_router(router_materia_prima)
+if router_recetas:
+    app.include_router(router_recetas)
+if router_productos:
+    app.include_router(router_productos)
+if router_ventas:
+    app.include_router(router_ventas)
+if router_produccion:
+    app.include_router(router_produccion)
+if router_reportes:
+    app.include_router(router_reportes)
 
-@app.get("/api/v1/productos")
-def get_productos(
-    skip: int = 0,
-    limit: int = 100,
-    db: Session = Depends(get_db),
-    current_user = Depends(get_current_active_user) if settings.REQUIRE_AUTH else None
-):
-    """Obtener lista de productos finales"""
-    return []
-
-@app.get("/api/v1/recetas")
-def get_recetas(
-    skip: int = 0,
-    limit: int = 100,
-    db: Session = Depends(get_db),
-    current_user = Depends(get_current_active_user) if settings.REQUIRE_AUTH else None
-):
-    """Obtener lista de recetas"""
-    return []
-
-@app.get("/api/v1/ventas")
-def get_ventas(
-    skip: int = 0,
-    limit: int = 100,
-    db: Session = Depends(get_db),
-    current_user = Depends(get_current_active_user) if settings.REQUIRE_AUTH else None
-):
-    """Obtener lista de ventas"""
-    return []
-
-@app.get("/api/v1/produccion")
-def get_produccion(
-    skip: int = 0,
-    limit: int = 100,
-    db: Session = Depends(get_db),
-    current_user = Depends(get_current_active_user) if settings.REQUIRE_AUTH else None
-):
-    """Obtener órdenes de producción"""
-    return []
-
-@app.get("/api/v1/reportes/dashboard")
-def get_dashboard(
-    db: Session = Depends(get_db),
-    current_user = Depends(get_current_active_user) if settings.REQUIRE_AUTH else None
-):
-    """Obtener datos del dashboard"""
-    return {
-        "total_ventas_hoy": 0,
-        "productos_stock_bajo": [],
-        "ordenes_pendientes": [],
-        "mensaje": "Dashboard vacío - backend en construcción"
-    }
-
-# ==================== FUNCIÓN SEED ====================
+# ==================== FUNCTION SEED ====================
 
 def seed_initial_data():
     """Crear datos iniciales"""
@@ -256,6 +223,30 @@ def seed_initial_data():
         )
         
         db.add(admin_user)
+        
+        # Crear unidades de medida básicas
+        unidades = [
+            UnidadMedida(nombre="kilogramo", abreviacion="kg", tipo="peso"),
+            UnidadMedida(nombre="gramo", abreviacion="g", tipo="peso"),
+            UnidadMedida(nombre="litro", abreviacion="l", tipo="volumen"),
+            UnidadMedida(nombre="mililitro", abreviacion="ml", tipo="volumen"),
+            UnidadMedida(nombre="unidad", abreviacion="un", tipo="cantidad"),
+        ]
+        
+        for unidad in unidades:
+            db.add(unidad)
+        
+        # Crear categorías básicas
+        categorias = [
+            CategoriaMateriaPrima(nombre="Harinas", descripcion="Harinas y polvos"),
+            CategoriaMateriaPrima(nombre="Azúcares", descripcion="Azúcares y endulzantes"),
+            CategoriaMateriaPrima(nombre="Grasas", descripcion="Mantequilla, aceites"),
+            CategoriaMateriaPrima(nombre="Químicos", descripcion="Levaduras, polvos químicos"),
+        ]
+        
+        for categoria in categorias:
+            db.add(categoria)
+        
         db.commit()
         
         print("✅ Datos iniciales creados exitosamente")
