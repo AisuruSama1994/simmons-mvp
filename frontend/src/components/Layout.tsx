@@ -1,4 +1,4 @@
-import { NavLink, useLocation } from 'react-router-dom';
+import { NavLink, useLocation, Outlet } from 'react-router-dom';
 import {
   LayoutDashboard, Package, BookOpen, Factory,
   ShoppingBag, ShoppingCart, BarChart3, ChevronRight,
@@ -14,13 +14,8 @@ const navItems = [
   { to: '/reportes',   icon: BarChart3,        label: 'Reportes' },
 ];
 
-interface LayoutProps {
-  children: React.ReactNode;
-}
-
-export default function Layout({ children }: LayoutProps) {
+export default function Layout() {
   const location = useLocation();
-
   const currentPage = navItems.find(item =>
     item.to === '/' ? location.pathname === '/' : location.pathname.startsWith(item.to)
   )?.label || 'Simmons';
@@ -36,7 +31,6 @@ export default function Layout({ children }: LayoutProps) {
             <div className="logo-sub">Panadería</div>
           </div>
         </div>
-
         <nav className="sidebar-nav">
           {navItems.map(({ to, icon: Icon, label }) => (
             <NavLink
@@ -51,7 +45,6 @@ export default function Layout({ children }: LayoutProps) {
             </NavLink>
           ))}
         </nav>
-
         <div className="sidebar-footer">
           <div className="sidebar-version">MVP v1.0.0</div>
         </div>
@@ -66,7 +59,7 @@ export default function Layout({ children }: LayoutProps) {
           </div>
         </header>
         <div className="page-body">
-          {children}
+          <Outlet />
         </div>
       </main>
     </div>

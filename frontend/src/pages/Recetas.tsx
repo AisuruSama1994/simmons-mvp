@@ -6,6 +6,8 @@ import { getMateriasPrimas, getUnidades } from '../services/materiasPrimas';
 import type { Receta, ProductoMateriaPrima, UnidadMedida } from '../types';
 
 export default function Recetas() {
+  console.log('🔵 Recetas component renderizando');
+  
   const [recetas, setRecetas] = useState<Receta[]>([]);
   const [materias, setMaterias] = useState<ProductoMateriaPrima[]>([]);
   const [unidades, setUnidades] = useState<UnidadMedida[]>([]);
@@ -19,13 +21,26 @@ export default function Recetas() {
   });
 
   const load = () => {
+    console.log('🟡 load() ejecutándose...');
     setLoading(true);
     Promise.all([getRecetas(), getMateriasPrimas(), getUnidades()])
-      .then(([r, m, u]) => { setRecetas(r); setMaterias(m); setUnidades(u); })
-      .finally(() => setLoading(false));
+      .then(([r, m, u]) => {
+        console.log('🟢 Datos recibidos:', { recetas: r.length, materias: m.length, unidades: u.length });
+        setRecetas(r);
+        setMaterias(m);
+        setUnidades(u);
+      })
+      .catch(err => console.error('❌ Error en load():', err))
+      .finally(() => {
+        console.log('🔵 Loading finalizado');
+        setLoading(false);
+      });
   };
 
-  useEffect(() => { load(); }, []);
+  useEffect(() => {
+    console.log('🟣 useEffect ejecutándose');
+    load();
+  }, []);
 
   const addIngrediente = () =>
     setForm(p => ({ ...p, ingredientes: [...p.ingredientes, { producto_materia_prima_id: '', cantidad: 0, unidad_medida_id: '' }] }));
@@ -52,6 +67,8 @@ export default function Recetas() {
     setModal(false);
     load();
   };
+
+  console.log('🟠 Estado actual:', { recetas: recetas.length, loading, materias: materias.length });
 
   return (
     <div className="page">
