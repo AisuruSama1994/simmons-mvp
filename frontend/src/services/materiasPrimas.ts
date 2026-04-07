@@ -2,157 +2,169 @@ import api from './api';
 import type {
   ProductoMateriaPrima, ProductoMateriaPrimaCreate,
   LoteMateriaPrima, LoteCreate,
-  Categoria, UnidadMedida, Proveedor,
+  Categoria, UnidadMedida,
+  Proveedor, ProveedorCreate,
+  ProductoProveedorPrecio, ProductoProveedorPrecioCreate,
 } from '../types';
 
-// Categorías
-export const getCategorias = () => api.get<Categoria[]>('/categorias-materia-prima').then(r => r.data);
-export const createCategoria = (data: { nombre: string }) => api.post<Categoria>('/categorias-materia-prima', data).then(r => r.data);
+// ─── Categorías ────────────────────────────────────────────────
 
-// Unidades
-export const getUnidades = () => api.get<UnidadMedida[]>('/unidades-medida').then(r => r.data);
-export const createUnidad = (data: { nombre: string; abreviatura: string }) => api.post<UnidadMedida>('/unidades-medida', data).then(r => r.data);
+export const getCategorias = () =>
+  api.get<Categoria[]>('/categorias-materia-prima').then(r => r.data);
 
-// Proveedores
-export const getProveedores = () => api.get<Proveedor[]>('/proveedores').then(r => r.data);
+export const createCategoria = (data: { nombre: string; descripcion?: string }) =>
+  api.post<Categoria>('/categorias-materia-prima', data).then(r => r.data);
 
-// Materia Prima
+export const updateCategoria = (id: number, data: { nombre: string; descripcion?: string }) =>
+  api.put<Categoria>(`/categorias-materia-prima/${id}`, data).then(r => r.data);
+
+export const deleteCategoria = (id: number) =>
+  api.delete(`/categorias-materia-prima/${id}`);
+
+// ─── Unidades de medida ────────────────────────────────────────
+
+export const getUnidades = () =>
+  api.get<UnidadMedida[]>('/unidades-medida').then(r => r.data);
+
+export const createUnidad = (data: { nombre: string; abreviatura: string; tipo: string }) =>
+  api.post<UnidadMedida>('/unidades-medida', {
+    nombre: data.nombre,
+    abreviacion: data.abreviatura,
+    tipo: data.tipo,
+  }).then(r => r.data);
+
+// ─── Proveedores ───────────────────────────────────────────────
+
+export const getProveedores = () =>
+  api.get<Proveedor[]>('/proveedores').then(r => r.data);
+
+export const getProveedor = (id: number) =>
+  api.get<Proveedor>(`/proveedores/${id}`).then(r => r.data);
+
+export const createProveedor = (data: ProveedorCreate) =>
+  api.post<Proveedor>('/proveedores', data).then(r => r.data);
+
+export const updateProveedor = (id: number, data: Partial<ProveedorCreate>) =>
+  api.put<Proveedor>(`/proveedores/${id}`, data).then(r => r.data);
+
+export const deleteProveedor = (id: number) =>
+  api.delete(`/proveedores/${id}`);
+
+// ─── Materia Prima ─────────────────────────────────────────────
+
+const mapMateriaPrima = (m: any): ProductoMateriaPrima => ({
+  id: m.id,
+  nombre: m.nombre,
+  marca: m.marca,
+  presentacion: m.presentacion,
+  codigo_barras: m.codigo_barras,
+  imagen_url: m.imagen_url,
+  descripcion: m.descripcion,
+  stock_minimo: m.stock_minimo,
+  categoria_id: m.categoria_id,
+  unidad_medida_id: m.unidad_medida_id,
+  activo: m.activo,
+  created_at: m.created_at,
+  categoria: m.categoria,
+  unidad_medida: m.unidad_medida
+    ? { ...m.unidad_medida, abreviatura: m.unidad_medida.abreviacion ?? m.unidad_medida.abreviatura }
+    : undefined,
+  proveedores_asociados: m.proveedores_asociados,
+});
+
 export const getMateriasPrimas = () =>
-  api.get<any[]>('/materia-prima').then(r => {
-    // Mapear respuesta del backend a formato esperado por el frontend
-    return r.data.map(m => ({
-      id: m.id,
-      nombre: m.nombre,
-      descripcion: m.descripcion,
-      precio_por_unidad: m.precio_unitario, // ← MAPEO: backend usa precio_unitario
-      stock_minimo: m.stock_minimo,
-      categoria_id: m.categoria_id,
-      unidad_medida_id: m.unidad_medida_id,
-      activo: m.activo,
-      categoria: { id: m.categoria_id, nombre: 'Categoría' },
-      unidad_medida: { id: m.unidad_medida_id, nombre: 'Unidad', abreviatura: 'un' },
-    }));
-  });
+  api.get<any[]>('/materia-prima').then(r => r.data.map(mapMateriaPrima));
 
 export const getMateriaPrima = (id: number) =>
-  api.get<ProductoMateriaPrima>(`/materia-prima/${id}`).then(r => r.data);
+  api.get<any>(`/materia-prima/${id}`).then(r => mapMateriaPrima(r.data));
 
 export const createMateriaPrima = (data: ProductoMateriaPrimaCreate) =>
   api.post<any>('/materia-prima', {
     nombre: data.nombre,
+    marca: data.marca,
+    presentacion: data.presentacion,
+    codigo_barras: data.codigo_barras,
     descripcion: data.descripcion,
     categoria_id: data.categoria_id,
     unidad_medida_id: data.unidad_medida_id,
-    precio_unitario: data.precio_por_unidad, // ← CAMBIO: enviar con nombre correcto del backend
     stock_minimo: data.stock_minimo,
-  }).then(r => {
-    // Mapear respuesta
-    return {
-      id: r.id,
-      nombre: r.nombre,
-      descripcion: r.descripcion,
-      precio_por_unidad: r.precio_unitario,
-      stock_minimo: r.stock_minimo,
-      categoria_id: r.categoria_id,
-      unidad_medida_id: r.unidad_medida_id,
-      activo: r.activo,
-      categoria: { id: r.categoria_id, nombre: 'Categoría' },
-      unidad_medida: { id: r.unidad_medida_id, nombre: 'Unidad', abreviatura: 'un' },
-    };
-  });
+  }).then(r => mapMateriaPrima(r.data));
 
 export const updateMateriaPrima = (id: number, data: Partial<ProductoMateriaPrimaCreate>) =>
-  api.put<ProductoMateriaPrima>(`/materia-prima/${id}`, {
+  api.put<any>(`/materia-prima/${id}`, {
     nombre: data.nombre,
+    marca: data.marca,
+    presentacion: data.presentacion,
+    codigo_barras: data.codigo_barras,
     descripcion: data.descripcion,
-    precio_unitario: data.precio_por_unidad,
     stock_minimo: data.stock_minimo,
-  }).then(r => r.data);
+    categoria_id: data.categoria_id,
+    unidad_medida_id: data.unidad_medida_id,
+  }).then(r => mapMateriaPrima(r.data));
 
 export const deleteMateriaPrima = (id: number) =>
   api.delete(`/materia-prima/${id}`);
 
-// Lotes
+// ─── Relación Producto ↔ Proveedor ────────────────────────────
+
+export const getProveedoresPorProducto = (productoId: number) =>
+  api.get<ProductoProveedorPrecio[]>(`/materia-prima/${productoId}/proveedores`).then(r => r.data);
+
+export const asociarProveedorAProducto = (data: ProductoProveedorPrecioCreate) =>
+  api.post<ProductoProveedorPrecio>('/producto-proveedor', data).then(r => r.data);
+
+export const actualizarPrecioProveedor = (id: number, precio: number) =>
+  api.patch<ProductoProveedorPrecio>(`/producto-proveedor/${id}`, { precio_referencia: precio }).then(r => r.data);
+
+export const desasociarProveedor = (id: number) =>
+  api.delete(`/producto-proveedor/${id}`);
+
+// ─── Lotes ─────────────────────────────────────────────────────
+
+const mapLote = (l: any): LoteMateriaPrima => ({
+  id: l.id,
+  numero_lote: l.lote_numero ?? l.numero_lote,
+  producto_materia_prima_id: l.producto_id ?? l.producto_materia_prima_id,
+  proveedor_id: l.proveedor_id,
+  cantidad_inicial: l.cantidad_inicial,
+  cantidad_disponible: l.cantidad_actual ?? l.cantidad_disponible,
+  precio_compra: l.precio_total ?? l.precio_compra,
+  precio_unitario: l.precio_unitario,
+  fecha_compra: l.fecha_compra,
+  fecha_vencimiento: l.fecha_vencimiento,
+  codigo_barras_lote: l.codigo_barras_lote,
+  estado: l.activo === false ? 'agotado' : 'disponible',
+  notas: l.notas,
+  created_at: l.created_at,
+  producto_materia_prima: l.producto ? mapMateriaPrima(l.producto) : undefined,
+  proveedor: l.proveedor,
+});
+
 export const getLotes = () =>
-  api.get<any[]>('/lotes-materia-prima').then(r => {
-    // Mapear respuesta del backend a formato esperado por el frontend
-    return r.data.map(l => ({
-      id: l.id,
-      numero_lote: l.lote_numero, // ← MAPEO: backend usa lote_numero
-      producto_materia_prima_id: l.producto_id,
-      cantidad_inicial: l.cantidad_inicial,
-      cantidad_disponible: l.cantidad_actual, // ← MAPEO: backend usa cantidad_actual
-      precio_compra: l.precio_total,
-      fecha_compra: l.fecha_compra,
-      fecha_vencimiento: l.fecha_vencimiento,
-      estado: l.activo ? 'activo' : 'vencido',
-      producto_materia_prima: {
-        id: l.producto_id,
-        nombre: 'Producto',
-        descripcion: '',
-        precio_por_unidad: 0,
-        stock_minimo: 0,
-        categoria_id: 0,
-        unidad_medida_id: 0,
-      },
-    }));
-  });
+  api.get<any[]>('/lotes-materia-prima').then(r => r.data.map(mapLote));
 
 export const getLotesActivos = () =>
-  api.get<any[]>('/lotes-materia-prima/activos').then(r => {
-    // Mapear respuesta del backend a formato esperado por el frontend
-    return r.data.map(l => ({
-      id: l.id,
-      numero_lote: l.lote_numero,
-      producto_materia_prima_id: l.producto_id,
-      cantidad_inicial: l.cantidad_inicial,
-      cantidad_disponible: l.cantidad_actual,
-      precio_compra: l.precio_total,
-      fecha_compra: l.fecha_compra,
-      fecha_vencimiento: l.fecha_vencimiento,
-      estado: 'activo',
-      producto_materia_prima: {
-        id: l.producto_id,
-        nombre: 'Producto',
-        descripcion: '',
-        precio_por_unidad: 0,
-        stock_minimo: 0,
-        categoria_id: 0,
-        unidad_medida_id: 0,
-      },
-    }));
-  });
+  api.get<any[]>('/lotes-materia-prima/activos').then(r => r.data.map(mapLote));
+
+export const getLotesProximosAVencer = () =>
+  api.get<any[]>('/lotes-materia-prima/proximos-vencer').then(r => r.data.map(mapLote));
 
 export const createLote = (data: LoteCreate) =>
   api.post<any>('/lotes-materia-prima', {
     producto_id: data.producto_materia_prima_id,
+    proveedor_id: data.proveedor_id,
     lote_numero: data.numero_lote,
     cantidad_inicial: data.cantidad_inicial,
-    precio_total: data.precio_compra,
+    cantidad_actual: data.cantidad_inicial,
+    precio_total: data.precio_compra ?? 0,
+    precio_unitario: data.precio_compra && data.cantidad_inicial
+      ? (data.precio_compra as number) / (data.cantidad_inicial as number)
+      : undefined,
     fecha_compra: data.fecha_compra,
     fecha_vencimiento: data.fecha_vencimiento,
+    codigo_barras_lote: data.codigo_barras_lote,
     activo: true,
-    proveedor_id: 1, // valor por defecto
-  }).then(r => {
-    // Mapear respuesta
-    return {
-      id: r.id,
-      numero_lote: r.lote_numero,
-      producto_materia_prima_id: r.producto_id,
-      cantidad_inicial: r.cantidad_inicial,
-      cantidad_disponible: r.cantidad_actual,
-      precio_compra: r.precio_total,
-      fecha_compra: r.fecha_compra,
-      fecha_vencimiento: r.fecha_vencimiento,
-      estado: 'activo',
-      producto_materia_prima: {
-        id: r.producto_id,
-        nombre: 'Producto',
-        descripcion: '',
-        precio_por_unidad: 0,
-        stock_minimo: 0,
-        categoria_id: 0,
-        unidad_medida_id: 0,
-      },
-    };
-  });
+  }).then(r => mapLote(r.data));
+
+export const deleteLote = (id: number) =>
+  api.delete(`/lotes-materia-prima/${id}`);

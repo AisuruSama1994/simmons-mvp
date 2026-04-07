@@ -373,3 +373,23 @@ body {
 ::-webkit-scrollbar-track { background: transparent; }
 ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
 ::-webkit-scrollbar-thumb:hover { background: var(--border-light); }
+
+/* ─── CRUD: Botones de acción en tabla ───────────────────────── */
+.btn--danger { background: var(--red); color: #fff; }
+.btn--danger:hover { background: var(--red-dark); }
+
+.btn-icon {
+  background: none; border: none; cursor: pointer;
+  padding: 4px 6px; border-radius: var(--radius-sm);
+  color: var(--text-muted); transition: all var(--transition);
+  display: inline-flex; align-items: center;
+}
+.btn-icon:hover { background: var(--bg-3); color: var(--text); }
+.btn-icon--danger:hover { background: rgba(239,68,68,0.1); color: var(--red); }
+
+.td-actions { white-space: nowrap; width: 1px; padding-right: 8px !important; }
+
+/* ─── Sacar flechitas de inputs numéricos ────────────────────── */
+input[type="number"]::-webkit-outer-spin-button,
+input[type="number"]::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+input[type="number"] { -moz-appearance: textfield; }

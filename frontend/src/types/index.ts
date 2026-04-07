@@ -10,16 +10,39 @@ export interface UnidadMedida {
   id: number;
   nombre: string;
   abreviatura: string;
+  tipo: 'peso' | 'volumen' | 'cantidad';
 }
+
+// ─── Proveedores ───────────────────────────────────────────────
 
 export interface Proveedor {
   id: number;
   nombre: string;
-  contacto?: string;
+  domicilio?: string;
   telefono?: string;
+  celular?: string;
+  whatsapp?: string;
   email?: string;
+  instagram?: string;
+  facebook?: string;
+  website?: string;
+  notas?: string;
   activo: boolean;
   created_at: string;
+  updated_at?: string;
+}
+
+export interface ProveedorCreate {
+  nombre: string;
+  domicilio?: string;
+  telefono?: string;
+  celular?: string;
+  whatsapp?: string;
+  email?: string;
+  instagram?: string;
+  facebook?: string;
+  website?: string;
+  notas?: string;
 }
 
 // ─── Materia Prima ─────────────────────────────────────────────
@@ -27,56 +50,94 @@ export interface Proveedor {
 export interface ProductoMateriaPrima {
   id: number;
   nombre: string;
+  marca?: string;
+  presentacion?: string;
+  codigo_barras?: string;
+  imagen_url?: string;
   descripcion?: string;
   categoria_id?: number;
-  proveedor_id?: number;
   unidad_medida_id?: number;
-  precio_por_unidad: number;
   stock_minimo: number;
   activo: boolean;
   created_at: string;
   categoria?: Categoria;
   unidad_medida?: UnidadMedida;
-  proveedor?: Proveedor;
+  proveedores_asociados?: ProductoProveedorPrecio[];
 }
 
 export interface ProductoMateriaPrimaCreate {
   nombre: string;
+  marca?: string;
+  presentacion?: string;
+  codigo_barras?: string;
   descripcion?: string;
   categoria_id?: number;
-  proveedor_id?: number;
   unidad_medida_id?: number;
-  precio_por_unidad?: number;
   stock_minimo?: number;
 }
+
+// ─── Relación Producto ↔ Proveedor ────────────────────────────
+
+export interface ProductoProveedorPrecio {
+  id: number;
+  producto_materia_prima_id: number;
+  proveedor_id: number;
+  precio_referencia?: number;
+  fecha_ultima_compra?: string;
+  activo: boolean;
+  notas?: string;
+  proveedor?: Proveedor;
+  historial_precios?: HistorialPrecioProveedor[];
+}
+
+export interface ProductoProveedorPrecioCreate {
+  producto_materia_prima_id: number;
+  proveedor_id: number;
+  precio_referencia?: number;
+  notas?: string;
+}
+
+export interface HistorialPrecioProveedor {
+  id: number;
+  producto_proveedor_id: number;
+  precio_unitario: number;
+  cantidad_comprada?: number;
+  fecha: string;
+  lote_id?: number;
+  notas?: string;
+}
+
+// ─── Lotes ─────────────────────────────────────────────────────
 
 export interface LoteMateriaPrima {
   id: number;
   numero_lote: string;
   producto_materia_prima_id: number;
+  proveedor_id?: number;
   cantidad_inicial: number;
   cantidad_disponible: number;
-  unidad_medida_id?: number;
   precio_compra: number;
+  precio_unitario?: number;
   fecha_compra?: string;
   fecha_vencimiento?: string;
-  proveedor_id?: number;
+  codigo_barras_lote?: string;
   estado: 'disponible' | 'agotado' | 'vencido';
   notas?: string;
   created_at: string;
   producto_materia_prima?: ProductoMateriaPrima;
+  proveedor?: Proveedor;
 }
 
 export interface LoteCreate {
   numero_lote: string;
   producto_materia_prima_id: number;
+  proveedor_id?: number;
   cantidad_inicial: number;
   cantidad_disponible: number;
-  unidad_medida_id?: number;
   precio_compra?: number;
   fecha_compra?: string;
   fecha_vencimiento?: string;
-  proveedor_id?: number;
+  codigo_barras_lote?: string;
   notas?: string;
 }
 
@@ -196,6 +257,15 @@ export interface VentaCreate {
   notas?: string;
 }
 
+// ─── Configuración ─────────────────────────────────────────────
+
+export interface Configuracion {
+  id: number;
+  clave: string;
+  valor: string;
+  descripcion?: string;
+}
+
 // ─── Reportes / Dashboard ──────────────────────────────────────
 
 export interface DashboardData {
@@ -227,7 +297,8 @@ export interface AlertaStock {
   deficit: number;
 }
 
-// ---- AUTENTICACIÓN ----
+// ─── Autenticación ─────────────────────────────────────────────
+
 export interface TokenResponse {
   access_token: string;
   token_type: string;
