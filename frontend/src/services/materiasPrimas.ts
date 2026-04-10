@@ -168,3 +168,72 @@ export const createLote = (data: LoteCreate) =>
 
 export const deleteLote = (id: number) =>
   api.delete(`/lotes-materia-prima/${id}`);
+
+// ─── STOCK TOTAL (FASE 2) ──────────────────────────────────────
+
+export interface StockTotal {
+  producto_id: number;
+  producto_nombre: string;
+  unidad_medida_nombre: string;
+  unidad_abreviacion: string;
+  stock_total: number;
+  cantidad_lotes: number;
+  stock_minimo: number;
+  estado_stock: 'OK' | 'BAJO' | 'ALERTA' | 'VENCIDO';
+}
+
+export interface AlertaStock {
+  producto_id: number;
+  producto_nombre: string;
+  stock_actual: number;
+  stock_minimo: number;
+  unidad_medida: string;
+  diferencia: number;
+  estado: 'BAJO' | 'ALERTA';
+}
+
+export interface LoteProximoVencer {
+  lote_id: number;
+  producto_nombre: string;
+  proveedor?: string;
+  cantidad: number;
+  unidad_medida: string;
+  fecha_vencimiento: string;
+  dias_para_vencer: number;
+}
+
+/**
+ * Obtener stock total de TODAS las materias primas
+ */
+export const getStockTotal = () =>
+  api.get<StockTotal[]>('/stock-total').then(r => r.data);
+
+/**
+ * Obtener stock total de una materia prima específica
+ */
+export const getStockTotalProducto = (productoId: number) =>
+  api.get<StockTotal>(`/stock-total/${productoId}`).then(r => r.data);
+
+/**
+ * Obtener desglose de lotes por producto
+ */
+export const getLotesPorProducto = (productoId: number) =>
+  api.get<any[]>(`/lotes-por-producto/${productoId}`).then(r => r.data);
+
+/**
+ * Obtener alertas de stock bajo
+ */
+export const getAlertasStock = (): Promise<AlertaStock[]> =>
+  api.get<{ total_alertas: number; fecha_consulta: string; alertas: AlertaStock[] }>('/alertas-stock')
+    .then(r => r.data.alertas || []);
+
+/**
+ * Obtener lotes próximos a vencer
+ * @param dias - Rango de días a verificar (default: 7)
+ */
+export const getLotesProximosVencer = (dias: number = 7): Promise<LoteProximoVencer[]> =>
+  api.get<{ dias_rango: number; fecha_consulta: string; total_lotes: number; lotes: LoteProximoVencer[] }>(
+    `/lotes-proximos-vencer?dias=${dias}`
+  ).then(r => r.data.lotes || []);
+export const updateLote = (id: number, data: any) =>
+  api.put(`/lotes-materia-prima/${id}`, data).then(r => r.data);

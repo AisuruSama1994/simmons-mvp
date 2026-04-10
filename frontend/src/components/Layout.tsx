@@ -1,17 +1,18 @@
 import { NavLink, useLocation, Outlet } from 'react-router-dom';
 import {
   LayoutDashboard, Package, BookOpen, Factory,
-  ShoppingBag, ShoppingCart, BarChart3, ChevronRight,
+  ShoppingBag, ShoppingCart, BarChart3, ChevronRight, Boxes,
 } from 'lucide-react';
 
 const navItems = [
-  { to: '/',           icon: LayoutDashboard, label: 'Dashboard' },
-  { to: '/inventario', icon: Package,         label: 'Inventario' },
-  { to: '/recetas',    icon: BookOpen,         label: 'Recetas' },
-  { to: '/produccion', icon: Factory,          label: 'Producción' },
-  { to: '/productos',  icon: ShoppingBag,      label: 'Productos' },
-  { to: '/ventas',     icon: ShoppingCart,     label: 'Ventas / POS' },
-  { to: '/reportes',   icon: BarChart3,        label: 'Reportes' },
+  { to: '/',              icon: LayoutDashboard, label: 'Dashboard' },
+  { to: '/materia-prima', icon: Boxes,           label: 'Materia Prima' },
+  { to: '/inventario',    icon: Package,         label: 'Inventario' },
+  { to: '/recetas',       icon: BookOpen,        label: 'Recetas' },
+  { to: '/produccion',    icon: Factory,         label: 'Producción' },
+  { to: '/productos',     icon: ShoppingBag,     label: 'Productos' },
+  { to: '/ventas',        icon: ShoppingCart,    label: 'Ventas / POS' },
+  { to: '/reportes',      icon: BarChart3,       label: 'Reportes' },
 ];
 
 export default function Layout() {
@@ -31,6 +32,7 @@ export default function Layout() {
             <div className="logo-sub">Panadería</div>
           </div>
         </div>
+
         <nav className="sidebar-nav">
           {navItems.map(({ to, icon: Icon, label }) => (
             <NavLink
@@ -45,6 +47,7 @@ export default function Layout() {
             </NavLink>
           ))}
         </nav>
+
         <div className="sidebar-footer">
           <div className="sidebar-version">MVP v1.0.0</div>
         </div>
@@ -58,6 +61,7 @@ export default function Layout() {
             <span className="topbar-badge">Sistema activo</span>
           </div>
         </header>
+
         <div className="page-body">
           <Outlet />
         </div>

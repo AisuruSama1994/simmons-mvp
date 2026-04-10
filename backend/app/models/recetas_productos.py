@@ -30,7 +30,32 @@ class Receta(Base):
 
 
 class RecetaIngrediente(Base):
-    """Ingredientes de una receta con su cantidad y unidad de medida"""
+    """
+    Ingredientes de una receta.
+    
+    CAMBIO IMPORTANTE (REFACTOR):
+    ─────────────────────────────
+    ❌ YA NO tiene unidad_medida_id
+    ✅ La unidad SIEMPRE viene de ProductoMateriaPrima.unidad_medida_id
+    
+    EJEMPLO:
+    ────────
+    Receta: MEDIALUNAS RELLENAS
+    Ingrediente 1:
+      - producto_materia_prima_id → MANTECA (cuya unidad_medida_id = GRAMOS)
+      - cantidad → 100
+      - unidad_medida → GRAMOS (heredada de MANTECA, no configurable)
+    
+    Ingrediente 2:
+      - producto_materia_prima_id → HUEVO (cuya unidad_medida_id = UNIDADES)
+      - cantidad → 2
+      - unidad_medida → UNIDADES (heredada de HUEVO, no configurable)
+    
+    Esto garantiza que el descuento de stock sea coherente:
+    - Se descuentan 100 GRAMOS de MANTECA
+    - Se descuentan 2 UNIDADES de HUEVO
+    - Ambas unidades coinciden con la configuración de la materia prima
+    """
     __tablename__ = "receta_ingredientes"
 
     id = Column(Integer, primary_key=True, index=True)
@@ -39,11 +64,11 @@ class RecetaIngrediente(Base):
         Integer, ForeignKey("productos_materia_prima.id"), nullable=False
     )
     cantidad = Column(Float, nullable=False)
-    unidad_medida_id = Column(Integer, ForeignKey("unidades_medida.id"), nullable=False)
+    # ❌ ELIMINADO: unidad_medida_id
+    # ✅ La unidad viene siempre de: ProductoMateriaPrima → unidad_medida_id
 
     receta = relationship("Receta", back_populates="ingredientes")
     producto_materia_prima = relationship("ProductoMateriaPrima")
-    unidad_medida = relationship("UnidadMedida")
 
 
 # ==================== GRUPO 4: INVENTARIO DE PRODUCTOS ====================

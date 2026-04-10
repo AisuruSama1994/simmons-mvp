@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from database import get_db
 from app.models.produccion import OrdenProduccion, TransformacionProduccion
-from app.models.recetas_productos import Receta, LoteProducto, InventarioProductoPorEstado
+from app.models.recetas_productos import Receta, RecetaIngrediente, LoteProducto, InventarioProductoPorEstado
 from app.models.base import Usuario
 from datetime import datetime
 from typing import Optional
@@ -37,7 +37,7 @@ class OrdenProduccionRead(BaseModel):
 
 class TransformacionCreate(BaseModel):
     orden_id: int
-    tipo_transformacion: str  # coccion, congelacion, empaquetado
+    tipo_transformacion: str
     cantidad: float
     estado_anterior: str
     estado_nuevo: str
@@ -73,7 +73,7 @@ def get_ordenes(
 
 @router.post("/produccion/ordenes", response_model=OrdenProduccionRead)
 def create_orden(data: OrdenProduccionCreate, db: Session = Depends(get_db)):
-    """Crear orden de producción"""
+    """Crear orden de producción (sin validación de stock por ahora)"""
     # Verificar que receta existe
     receta = db.query(Receta).filter(Receta.id == data.receta_id).first()
     if not receta:
